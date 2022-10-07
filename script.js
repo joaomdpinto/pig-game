@@ -14,8 +14,7 @@ const playerElement1 = document.querySelector('.player--1');
 
 //Global variables
 let activePlayer = 0;
-let currentScore0 = 0;
-let currentScore1 = 0;
+let currentScore = 0;
 let score0 = 0;
 let score1 = 0;
 
@@ -27,21 +26,20 @@ const startGame = function () {
   updateScore(currentScore1Element, 0);
   diceElement.classList.add('hidden');
   activePlayer = 0;
+
+  //restart game
   playerElement1.classList.remove('player--active');
   playerElement0.classList.add('player--active');
+  playerElement1.classList.remove('player--winner');
+  playerElement0.classList.remove('player--winner');
   btnRoll.disabled = false;
   btnHold.disabled = false;
 };
 
 const switchPlayer = function () {
   activePlayer = !activePlayer;
-  if (activePlayer) {
-    playerElement0.classList.remove('player--active');
-    playerElement1.classList.add('player--active');
-  } else {
-    playerElement1.classList.remove('player--active');
-    playerElement0.classList.add('player--active');
-  }
+  playerElement0.classList.toggle('player--active');
+  playerElement1.classList.toggle('player--active');
 };
 
 const updateScore = function (element, value) {
@@ -49,21 +47,13 @@ const updateScore = function (element, value) {
 };
 
 const resetCurrentScoreActivePlayer = function () {
-  if (!activePlayer) {
-    currentScore0 = 0;
-    updateScore(currentScore0Element, currentScore0);
-  } else {
-    currentScore1 = 0;
-    updateScore(currentScore1Element, currentScore1);
-  }
+  currentScore = 0;
+  if (!activePlayer) updateScore(currentScore0Element, currentScore);
+  else updateScore(currentScore1Element, currentScore);
 };
 
 const isPalyerWinTheGame = function () {
-  if (!activePlayer) {
-    return score0 >= 100;
-  } else {
-    return score1 >= 100;
-  }
+  return !activePlayer ? score0 >= 100 : score1 >= 100;
 };
 
 //Rolling dice functionality
@@ -80,12 +70,12 @@ btnRoll.addEventListener('click', function () {
     resetCurrentScoreActivePlayer();
     switchPlayer();
   } else {
+    currentScore += dice;
+
     if (!activePlayer) {
-      currentScore0 += dice;
-      updateScore(currentScore0Element, currentScore0);
+      updateScore(currentScore0Element, currentScore);
     } else {
-      currentScore1 += dice;
-      updateScore(currentScore1Element, currentScore1);
+      updateScore(currentScore1Element, currentScore);
     }
   }
 });
@@ -93,11 +83,11 @@ btnRoll.addEventListener('click', function () {
 //User holds score
 btnHold.addEventListener('click', function () {
   if (!activePlayer) {
-    score0 += currentScore0;
+    score0 += currentScore;
     updateScore(score0Element, score0);
     resetCurrentScoreActivePlayer();
   } else {
-    score1 += currentScore1;
+    score1 += currentScore;
     updateScore(score1Element, score1);
     resetCurrentScoreActivePlayer();
   }
@@ -107,6 +97,9 @@ btnHold.addEventListener('click', function () {
   } else {
     btnRoll.disabled = true;
     btnHold.disabled = true;
+    !activePlayer
+      ? playerElement0.classList.add('player--winner')
+      : playerElement1.classList.add('player--winner');
   }
 });
 
